@@ -1,4 +1,4 @@
-import java.util.*;
+//import java.util.*;
 //6
 boolean[] keys = new boolean[91];
 
@@ -42,7 +42,6 @@ void setup() {
 
 void draw() {
   background(0);
-  //text(Arrays.toString(keys),50,50);
   if (mode<4) {
     stroke(255);
     fill(0);
@@ -288,6 +287,22 @@ ArrayList <particle> copyParticles(ArrayList <particle> _particles) {
   return newParticles;
 }
 
+int[] copyArray(int[] _array) {
+  int[] newArray = new int[_array.length];
+  for (int i=0;i<_array.length;i++) {
+    newArray[i] = _array[i];
+  }
+  return newArray;
+}
+
+star[] copyStars(star[] _array) {
+  star[] newArray = new star[_array.length];
+  for (int i=0;i<_array.length;i++) {
+    newArray[i] = _array[i];
+  }
+  return newArray;
+}
+
 savestate saveState() {
   return new savestate(count, count2, shots, totalAsteroids, bullets, breakAsteroids, controls, laser, s, rocks, particles, stars, dead, complete, paused);
 }
@@ -304,7 +319,7 @@ void loadState(savestate state) {
   s = state.s.copy();
   rocks = copyRocks(state.rocks);
   particles = copyParticles(state.particles);
-  stars = Arrays.copyOf(state.stars,state.stars.length);
+  stars = copyStars(state.stars);
   dead = state.dead;
   complete = state.complete;
   paused = state.paused;
