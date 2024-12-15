@@ -26,7 +26,7 @@ class savestate {
     s = _s.copy();
     rocks = copyRocks(_rocks);
     particles = copyParticles(_particles);
-    stars = Arrays.copyOf(_stars,_stars.length);
+    stars = copyStars(_stars);
     dead = _dead;
     complete = _complete;
     paused = _paused;
