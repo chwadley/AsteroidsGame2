@@ -38,16 +38,16 @@ class ship extends Floater {
   
   public void moveStepEachFrame() {
     if (controls) {
-      if (currentInput.up) {
+      if (keys[87]) {
         dy-=power;
       }
-      if (currentInput.down) {
+      if (keys[83]) {
         dy+=power;
       }
-      if (currentInput.right) {
+      if (keys[65]) {
         dx-=power;
       }
-      if (currentInput.left) {
+      if (keys[68]) {
         dx+=power;
       }
       if (dx!=0) {
@@ -108,8 +108,8 @@ class ship extends Floater {
   }
   
   public void warp() {
-    dx=_random(0,width);
-    dy=_random(0,height);
+    x=_random(0,width);
+    y=_random(0,height);
     dx=0;
     dy=0;
     dir=_random(0,2*PI);
