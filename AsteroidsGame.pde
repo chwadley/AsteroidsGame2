@@ -153,7 +153,7 @@ void display() {
   fill(0);
   noStroke();
   textAlign(CENTER,CENTER);
-  text("Asteroids hit: "+Integer.toString(count)+"\n"+Integer.toString(count2)+" small asteroids broken\n"+(bullets?"Shots used: "+Integer.toString(shots)+"\n"+Integer.toString(shots-count)+" bullets currently on screen\nShots":"Hits")+" required to break all asteroids: "+Integer.toString(totalAsteroids),
+  text("Asteroids hit: "+count+"\n"+count2+" small asteroids broken\n"+(bullets?"Shots used: "+shots+"\n"+(shots-count)+" bullets currently on screen\nShots":"Hits")+" required to break all asteroids: "+totalAsteroids,
   155,55);
   //text(count2,50,150);
   
@@ -252,9 +252,9 @@ void end() {
   noStroke();
   fill(0);
   textAlign(CENTER,CENTER);
-  text("Asteroids hit: "+Integer.toString(count),mouseX,mouseY-25);
-  text(Integer.toString(count2)+" of those were the smallest size",mouseX,mouseY);
-  text("You used "+Integer.toString(shots)+" bullets",mouseX,mouseY+25);
+  text("Asteroids hit: "+count,mouseX,mouseY-25);
+  text(count2+" of those were the smallest size",mouseX,mouseY);
+  text("You used "+shots+" bullets",mouseX,mouseY+25);
   dead=true;
 }
 
@@ -268,7 +268,7 @@ void goodEnd() {
   noStroke();
   fill(0);
   textAlign(CENTER,CENTER);
-  text("You got all "+Integer.toString(count)+" asteroids,\n\nincluding "+Integer.toString(count2)+" asteroids of the smallest size.\n\nYou used "+Integer.toString(shots)+" bullets",mouseX,mouseY);
+  text("You got all "+count+" asteroids,\n\nincluding "+count2+" asteroids of the smallest size.\n\nYou used "+shots+" bullets",mouseX,mouseY);
 }
 
 ArrayList <rock> copyRocks(ArrayList <rock> _rocks) {
