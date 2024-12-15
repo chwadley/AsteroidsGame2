@@ -29,8 +29,8 @@ class rock extends Floater {
     dy = _dy;
     size = _size;
     corners = _corners;
-    cx = Arrays.copyOf(_cx,_cx.length);
-    cy = Arrays.copyOf(_cy,_cy.length);
+    cx = copyArray(_cx);
+    cy = copyArray(_cy);
     rotVel = _rotVel;
   }
   
