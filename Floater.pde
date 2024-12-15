@@ -39,7 +39,7 @@ class Floater {//Do NOT modify the Floater class! Make changes in the Spaceship 
   public void show() { //draws the floater at the current position          
     fill(col);
     
-    push();
+    //push();
     //translate the (x,y) center of the ship to the correct position
     translate(x,y);
     
@@ -54,6 +54,9 @@ class Floater {//Do NOT modify the Floater class! Make changes in the Spaceship 
     endShape(CLOSE);
 
     //instead of "unrotating" and "untranslating," we can just use Processing's push() and pop() functions which automates this.
-    pop();
+    //actually we can't do this because processing.js does not support push() and pop().
+    rotate(-dir);
+    translate(-x,-y);
+    //pop();
   }   
 }
