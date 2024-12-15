@@ -15,8 +15,7 @@ float _dist(float[] a, float[] b) {
 int count=0;
 int count2=0;
 int shots=0;
-int frameNum=0;
-int totalAsteroids = 620;
+int totalAsteroids;
 boolean bullets=false;
 boolean breakAsteroids=true;
 boolean controls=true; //new=true
@@ -24,18 +23,11 @@ boolean laser=false;
 ship s;
 ArrayList <rock> rocks = new ArrayList <rock>();
 ArrayList <particle> particles = new ArrayList <particle>();
-ArrayList <input> allInputs = new ArrayList <input>();
-ArrayList <input> currentInputs = new ArrayList <input>();
-ArrayList <input> bestInputs = new ArrayList <input>();
-int best=0;
-int tempScore=0;
-int iterations=0;
-input currentInput;
 star[] stars = new star[20];
+boolean dead = false;
+boolean complete = false;
+boolean paused = false;
 savestate state1;
-savestate bestState;
-savestate startState;
-int replayFrame=0;
 
 void setup() {
   size(1500,800);
@@ -50,59 +42,52 @@ void setup() {
 
 void draw() {
   background(0);
-  if (mode==0) currentInput = new input(false,false,Math.random()>0.5,Math.random()>0.5,Math.random()>0.5,Math.random()>0.5);
-  if (mode==1) {
-    if (replayFrame<allInputs.size()) {
-      currentInput = allInputs.get(replayFrame);
-    } else {
-      currentInput = new input(false,false,false,false,false,false);
-    }
-    replayFrame++;
-  }
-  frame();
-  if (frameCount==1) {
-    state1 = saveState();
-    startState = saveState();
+  //text(Arrays.toString(keys),50,50);
+  if (mode<4) {
+    stroke(255);
+    fill(0);
+    rect(width/2-200,height/2-50,400,100);
+    textAlign(CENTER,CENTER);
+    fill(255);
+    noStroke();
   }
   if (mode==0) {
-    currentInputs.add(currentInput);
-    frameNum++;
-    if (frameNum>=60) {
-      frameNum=0;
-      tempScore=count+count2; //weight small asteroids more
-      if (tempScore>=best) {
-        best=tempScore;
-        bestInputs = copyInputs(currentInputs);
-        bestState = saveState();
-      }
-      iterations++;
-      if (iterations>10) {
-        for (int i=0;i<bestInputs.size();i++) {
-          allInputs.add(bestInputs.get(i));
-        }
-        bestInputs.clear();
-        loadState(bestState);
-        state1 = saveState();
-        iterations=0;
-      }
-      loadState(state1);
-      currentInputs.clear();
-    }
+    text("Run into asteroids to break them (indestructible ship)",width/2,height/2-25);
+    text("Bullets break asteroids (destructible ship)",width/2,height/2+25); 
+  }
+  if (mode==1) {
+    text("Asteroids break into smaller ones",width/2,height/2-25);
+    text("Asteroids immediately disappear when broken",width/2,height/2+25);
+  }
+  if (mode==2) {
+    text("Ship moves in the direction you input with WASD",width/2,height/2-25);
+    text("A/D turns the ship",width/2,height/2+25);
+  }
+  if (mode==3) {
+    text("Shoots one bullet at a time",width/2,height/2-25);
+    text("Shoots a continuous laser beam",width/2,height/2+25);
+  }
+  if (mode==4) {
+    if (!(dead||complete||paused)) physics();
+    display();
+    if (dead) end();
+    if (complete) goodEnd();
+    if (paused) pauseMenu();
   }
 }
 
-void frame() {
+void physics() {
   for (int i=0;i<stars.length;i++) {
-    star a = stars[i];
-    a.move();
-    a.show();
+    stars[i].move();
   }
   s.moveStepEachFrame();
-  s.show();
+  if (keys[76]&&bullets&&laser) {
+    particles.add(new particle(s.getPos(),s.getD(),s.getVelocity()));
+    shots++;
+  }
   for (int i=0;i<rocks.size();i++) {
     rock a = (rock)rocks.get(i);
     a.move();
-    a.show();
     for (int j=0;j<particles.size();j++) {
       //particle b = particles.get(j);
       if (_dist(a.getPos(),particles.get(j).getPos())<a.getSize()/2) {
@@ -125,6 +110,7 @@ void frame() {
     if (_dist(a.getPos(),s.getPos())<a.getSize()/2) {
       if (bullets) {
         end();
+        dead=true;
       } else {
         float _size=a.getSize();
         float[] _pos=a.getPos();
@@ -144,36 +130,99 @@ void frame() {
   for (int i=0;i<particles.size();i++) {
     particle a = (particle)particles.get(i);
     a.move();
-    a.show();
-    
     if (a.check()) {
       particles.remove(i);
       i--;
     }
   }
-  /*fill(255);
+}
+
+void display() {
+  for (int i=0;i<stars.length;i++) {
+    stars[i].show();
+  }
+  s.show();
+  for (int i=0;i<rocks.size();i++) {
+    rocks.get(i).show();
+  }
+  for (int i=0;i<particles.size();i++) {
+    particles.get(i).show();
+  }
+  fill(255);
   stroke(128);
-  rect(25,75,300,300);
+  rect(5,5,300,100);
   fill(0);
   noStroke();
   textAlign(CENTER,CENTER);
-  text("Asteroids hit: "+Integer.toString(count)+"\n"+Integer.toString(count2)+" small asteroids broken\n"+(bullets?"Shots used: "+Integer.toString(shots)+"\n"+Integer.toString(shots-count)+"bullets currently on screen\nShots":"Hits")+" required to break all asteroids: "+Integer.toString(totalAsteroids),150,200);
-  text(count2,50,150);*/
+  text("Asteroids hit: "+Integer.toString(count)+"\n"+Integer.toString(count2)+" small asteroids broken\n"+(bullets?"Shots used: "+Integer.toString(shots)+"\n"+Integer.toString(shots-count)+" bullets currently on screen\nShots":"Hits")+" required to break all asteroids: "+Integer.toString(totalAsteroids),
+  155,55);
+  //text(count2,50,150);
+  
+  /*fill(255);
+  stroke(128);
+  int h=100;
+  int h2=70;
+  rect(5,height-(h+5),300,h);
+  fill(255,0,0);
+  rect(10,height-h2,290,h2-10);
+  float[] temp_percents = new float[5]; //50, 33, 22, 14, 9
+  for (int i=0;i<rocks.size();i++) {
+    temp_percents[rocks.get(i).getSizeIndex()]++;
+  }
+  float[] percents = new float[temp_percents.length];
+  for (int i=0;i<percents.length;i++) {
+    percents[i] = sumPartialArray(temp_percents,i+1);
+  }
+  text(Arrays.toString(percents),500,500);
+  //float[] percents = new float[]{0.3,0.5,0.7,0.8,1};
+  for (int i=percents.length-1;i>=0;i--) {
+    fill(255*i/(percents.length-1));
+    //percents[i] /= rocks.size();
+    rect(10,height-h2,percents[i]*290/rocks.size(),h2-10);
+  }*/
+}
+
+float sumPartialArray(float[] arr,int l) {
+  float sum=0;
+  for (int i=0;i<l;i++) sum+=arr[i];
+  return sum;
+}
+
+void pauseMenu() {
+  noStroke();
+  fill(0,128);
+  rect(0,0,width,height);
+  fill(255);
+  textAlign(CENTER,CENTER);
+  text("Space to unpause",width/2,height/2);
 }
 
 void smallAsteroidBroken() {
   count2++;
   if (count==totalAsteroids) {
+    complete = true;
     goodEnd();
   }
 }
 
 void keyPressed() {
-  if (keyCode<keys.length) keys[keyCode]=true;
-  if (key=='s') {
-    mode=1;
-    loadState(startState);
+  if (keyCode==76&&!keys[76]&&!laser&&bullets) {
+    particles.add(new particle(s.getPos(),s.getD(),s.getVelocity()));
+    shots++;
   }
+  if (keyCode==32&&!keys[32]) {
+    paused = !paused;
+  }
+  if (keyCode<keys.length) keys[keyCode]=true;
+  if (key==',') s.dash();
+  if (key=='r') reset();
+  if (keyCode==10) s.warp();
+  if (key==';') {
+    noLoop();
+    loadState(state1);
+    loop();
+  }
+  if (key=='\'') state1=saveState();
 }
 
 void keyReleased() {
@@ -190,6 +239,8 @@ void reset() {
   rocks.clear();
   setup();
   loop();
+  dead = false;
+  complete = false;
 }
 
 void end() {
@@ -202,10 +253,10 @@ void end() {
   noStroke();
   fill(0);
   textAlign(CENTER,CENTER);
-  text("Asteroids hit:"+Integer.toString(count),mouseX,mouseY-25);
+  text("Asteroids hit: "+Integer.toString(count),mouseX,mouseY-25);
   text(Integer.toString(count2)+" of those were the smallest size",mouseX,mouseY);
   text("You used "+Integer.toString(shots)+" bullets",mouseX,mouseY+25);
-  noLoop();
+  dead=true;
 }
 
 void goodEnd() {
@@ -219,7 +270,6 @@ void goodEnd() {
   fill(0);
   textAlign(CENTER,CENTER);
   text("You got all "+Integer.toString(count)+" asteroids,\n\nincluding "+Integer.toString(count2)+" asteroids of the smallest size.\n\nYou used "+Integer.toString(shots)+" bullets",mouseX,mouseY);
-  noLoop();
 }
 
 ArrayList <rock> copyRocks(ArrayList <rock> _rocks) {
@@ -238,16 +288,8 @@ ArrayList <particle> copyParticles(ArrayList <particle> _particles) {
   return newParticles;
 }
 
-ArrayList <input> copyInputs(ArrayList <input> _inputs) {
-  ArrayList <input> newInputs = new ArrayList <input>();
-  for (int i=0;i<_inputs.size();i++) {
-    newInputs.add(_inputs.get(i).copy());
-  }
-  return newInputs;
-}
-
 savestate saveState() {
-  return new savestate(count, count2, shots, totalAsteroids, bullets, breakAsteroids, controls, laser, s, rocks, particles, stars);
+  return new savestate(count, count2, shots, totalAsteroids, bullets, breakAsteroids, controls, laser, s, rocks, particles, stars, dead, complete, paused);
 }
 
 void loadState(savestate state) {
@@ -263,4 +305,29 @@ void loadState(savestate state) {
   rocks = copyRocks(state.rocks);
   particles = copyParticles(state.particles);
   stars = Arrays.copyOf(state.stars,state.stars.length);
+  dead = state.dead;
+  complete = state.complete;
+  paused = state.paused;
+}
+
+void mousePressed() {
+  if (mouseX>=width/2-200&&mouseX<=width/2+200&&mouseY>=height/2-50&&mouseY<=height/2+50) {
+    if (mouseY>height/2) {
+      if (mode==0) {
+        bullets = true;
+      } else if (mode==1) {
+        breakAsteroids = false;
+      } else if (mode==2) {
+        controls = false;
+      } else if (mode==3) {
+        laser = true;
+      }
+    }
+    if (mode==3) {
+      totalAsteroids = breakAsteroids?620:20;
+      state1 = saveState();
+    }
+    if (mode<4) mode++;
+    if (mode==3&&!bullets) mode++;
+  }
 }
