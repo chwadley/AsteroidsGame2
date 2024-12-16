@@ -2,7 +2,7 @@ class ship extends Floater {
   private boolean dashing;
   private int dashTimer;
   private float maxSpeed;
-  public static final float power = 1;
+  public static final float power = 0.1;
   
   public ship(float _x, float _y) {
     col=255;
