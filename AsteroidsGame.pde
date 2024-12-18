@@ -32,7 +32,7 @@ savestate state1;
 void setup() {
   size(1500,800);
   s = new ship(width/2,height/2);
-  for (int i=0;i<20;i++) { //20
+  for (int i=0;i<50;i++) { //20
     rocks.add(new rock(50,new float[]{_random(0,width),_random(0,height)}));
   }
   for (int i=0;i<stars.length;i++) {
