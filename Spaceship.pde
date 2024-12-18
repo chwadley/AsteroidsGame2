@@ -39,16 +39,16 @@ class ship extends Floater {
   public void moveStepEachFrame() {
     if (controls) {
       if (keys[87]) {
-        dy-=power;
+        dy-=1;
       }
       if (keys[83]) {
-        dy+=power;
+        dy+=1;
       }
       if (keys[65]) {
-        dx-=power;
+        dx-=1;
       }
       if (keys[68]) {
-        dx+=power;
+        dx+=1;
       }
       if (dx!=0) {
         dir = atan((float)(dy/dx));
@@ -68,10 +68,10 @@ class ship extends Floater {
         accelerate(-0.5);
       }
       if (keys[65]) {
-        turn(-5);
+        turn(-power);
       }
       if (keys[68]) {
-        turn(5);
+        turn(power);
       }
     }
     dashTimer-=dashing?1:0;
