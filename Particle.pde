@@ -1,5 +1,4 @@
 class particle extends Floater {
-  private float size;
   public particle(float[] pos,float d,float[] momentum) {
     col = 255;
     x = pos[0];
@@ -32,13 +31,5 @@ class particle extends Floater {
   
   public boolean check() {
     return x<0||x>width||y<0||y>height;
-  }
-  
-  public float[] getPos() {
-    return new float[]{x,y};
-  }
-  
-  public float getSize() {
-    return size;
   }
 }
