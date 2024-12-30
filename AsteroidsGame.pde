@@ -61,7 +61,7 @@ void draw() {
     rect(width/2-200,height/2+75,400,50);
     fill(255);
     noStroke();
-    text("Or, see an optimal run of this game",width/2,height/2+100);
+    text("Or, see an optimal speedrun of this game",width/2,height/2+100);
   }
   if (mode==1) {
     text("Asteroids break into smaller ones",width/2,height/2-25);
