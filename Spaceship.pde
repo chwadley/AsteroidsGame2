@@ -2,8 +2,7 @@ class ship extends Floater {
   private boolean dashing;
   private int dashTimer;
   private float maxSpeed;
-  public static final float power = 0.1;
-  
+  public static final float power = 1;
   public ship(float _x, float _y) {
     col=255;
     x=_x;
@@ -38,17 +37,17 @@ class ship extends Floater {
   
   public void moveStepEachFrame() {
     if (controls) {
-      if (keys[87]) {
-        dy-=1;
+      if (tas?currentInput.up:keys[87]) {
+        dy-=power;
       }
-      if (keys[83]) {
-        dy+=1;
+      if (tas?currentInput.down:keys[83]) {
+        dy+=power;
       }
-      if (keys[65]) {
-        dx-=1;
+      if (tas?currentInput.left:keys[65]) {
+        dx-=power;
       }
-      if (keys[68]) {
-        dx+=1;
+      if (tas?currentInput.right:keys[68]) {
+        dx+=power;
       }
       if (dx!=0) {
         dir = atan((float)(dy/dx));
@@ -68,10 +67,10 @@ class ship extends Floater {
         accelerate(-0.5);
       }
       if (keys[65]) {
-        turn(-power);
+        turn(-0.2);
       }
       if (keys[68]) {
-        turn(power);
+        turn(0.2);
       }
     }
     dashTimer-=dashing?1:0;
@@ -81,30 +80,22 @@ class ship extends Floater {
     text(sp,50,50);
     float friction = 1;
     dx*=dashing?0.98:friction;
-    dx*=dashing?0.98:friction;
+    dy*=dashing?0.98:friction;
     maxSpeed = 6.666;
     dx=sp>maxSpeed&&!dashing?dx*maxSpeed/sp:dx; //these two lines are to make sure that the spaceship cannot gain too much speed.
     dy=sp>maxSpeed&&!dashing?dy*maxSpeed/sp:dy; //this caps the player's speed at maxSpeed.
     move();
   }
   
-  public float[] getPos() {
-    return new float[]{x,y};
-  }
-  
   public float getD() {
     return dir;
-  }
-  
-  public float[] getVelocity() {
-    return new float[]{dx,dy};
   }
   
   public void dash() {
     dashing=true;
     dashTimer=10;
-    dx=cos(dir)*10;
-    dy=sin(dir)*10;
+    dx=cos(dir)*15;
+    dy=sin(dir)*15;
   }
   
   public void warp() {
