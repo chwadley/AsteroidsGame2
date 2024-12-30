@@ -105,7 +105,7 @@ void draw() {
     }
     if (!(dead||complete||paused)) physics(currentInput);
     display();
-    if (tas) {
+    if (false&&tas) {
       stroke(255);
       strokeWeight(3);
       line(500,500,500+cos(currentDir)*50,500+sin(currentDir)*50);
