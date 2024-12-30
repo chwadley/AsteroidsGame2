@@ -262,7 +262,7 @@ void smallAsteroidBroken() {
 }
 
 void keyPressed() {
-  System.out.println(keyCode);
+  //System.out.println(keyCode);
   if (tas?false:(keyCode==76&&!keys[76]&&!laser&&bullets)) {
     particles.add(new particle(s.getPos(),s.getD(),s.getVelocity()));
     shots++;
