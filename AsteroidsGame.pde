@@ -1,6 +1,5 @@
-//import java.util.*;
-//6
-boolean[] keys = new boolean[91];
+boolean[] keys = new boolean[223];
+boolean[] keyPresses = new boolean[223];
 
 int mode = 0;
 
@@ -15,7 +14,7 @@ float _dist(float[] a, float[] b) {
 int count=0;
 int count2=0;
 int shots=0;
-int totalAsteroids;
+int totalAsteroids=0;
 boolean bullets=false;
 boolean breakAsteroids=true;
 boolean controls=true; //new=true
@@ -28,6 +27,10 @@ boolean dead = false;
 boolean complete = false;
 boolean paused = false;
 savestate state1;
+input currentInput;
+boolean tas = false;
+float currentDir,targetDir;
+float time;
 
 void setup() {
   size(1500,800);
@@ -52,7 +55,13 @@ void draw() {
   }
   if (mode==0) {
     text("Run into asteroids to break them (indestructible ship)",width/2,height/2-25);
-    text("Bullets break asteroids (destructible ship)",width/2,height/2+25); 
+    text("Bullets break asteroids (destructible ship)",width/2,height/2+25);
+    stroke(255);
+    fill(0);
+    rect(width/2-200,height/2+75,400,50);
+    fill(255);
+    noStroke();
+    text("Or, see an optimal run of this game",width/2,height/2+100);
   }
   if (mode==1) {
     text("Asteroids break into smaller ones",width/2,height/2-25);
@@ -67,20 +76,55 @@ void draw() {
     text("Shoots a continuous laser beam",width/2,height/2+25);
   }
   if (mode==4) {
-    if (!(dead||complete||paused)) physics();
+    //find the closest asteroid
+    if (totalAsteroids==0) {
+      totalAsteroids = breakAsteroids?rocks.size()*31:rocks.size();
+    }
+    if (rocks.size()>0) {
+      float best=10000;
+      rock bestRock = rocks.get(0);
+      float[] targetPos = new float[]{1113910203,1923094859};
+      float[] pos = s.getPos();
+      for (int i=0;i<rocks.size();i++) {
+        rock a = rocks.get(i);
+        float _d = _dist(pos,a.getPos());
+        if (_d<=best) {
+          best=_d;
+          targetPos=a.getPos();
+          bestRock=a;
+        }
+      }
+      //accelerate in the direction of the asteroid
+      float xAcc = pos[0]-targetPos[0];
+      float yAcc = pos[1]-targetPos[1];
+      float[] vel = s.getVelocity();
+      currentDir = s.getD();
+      targetDir = atan(yAcc/xAcc);
+      targetDir += xAcc>0?PI:0;
+      currentInput = new input(tas?false:keys[76],tas?false&&(best>100&&bestRock.getSize()<40):keys[44],tas?yAcc+vel[1]>0:keys[87],tas?yAcc+vel[1]<0:keys[83],tas?xAcc+vel[0]<0:keys[65],tas?xAcc+vel[0]>0:keys[68]);
+    }
+    if (!(dead||complete||paused)) physics(currentInput);
     display();
+    if (tas) {
+      stroke(255);
+      strokeWeight(3);
+      line(500,500,500+cos(currentDir)*50,500+sin(currentDir)*50);
+      line(500,500,500+cos(targetDir)*50,500+sin(targetDir)*50);
+      strokeWeight(1);
+    }
     if (dead) end();
     if (complete) goodEnd();
     if (paused) pauseMenu();
   }
 }
 
-void physics() {
+void physics(input _input) {
+  if (_input.dash) s.dash();
   for (int i=0;i<stars.length;i++) {
     stars[i].move();
   }
   s.moveStepEachFrame();
-  if (keys[76]&&bullets&&laser) {
+  if (_input.shoot&&bullets&&laser) {
     particles.add(new particle(s.getPos(),s.getD(),s.getVelocity()));
     shots++;
   }
@@ -155,6 +199,9 @@ void display() {
   textAlign(CENTER,CENTER);
   text("Asteroids hit: "+count+"\n"+count2+" small asteroids broken\n"+(bullets?"Shots used: "+shots+"\n"+(shots-count)+" bullets currently on screen\nShots":"Hits")+" required to break all asteroids: "+totalAsteroids,
   155,55);
+  if (count>=totalAsteroids) {
+    goodEnd();
+  }
   //text(count2,50,150);
   
   /*fill(255);
@@ -179,6 +226,15 @@ void display() {
     //percents[i] /= rocks.size();
     rect(10,height-h2,percents[i]*290/rocks.size(),h2-10);
   }*/
+  fill(currentInput.right?255:128);
+  stroke(255);
+  rect(5,405,40,40);
+  fill(currentInput.down?255:128);
+  rect(45,405,40,40);
+  fill(currentInput.left?255:128);
+  rect(85,405,40,40);
+  fill(currentInput.up?255:128);
+  rect(45,365,40,40);
 }
 
 float sumPartialArray(float[] arr,int l) {
@@ -200,28 +256,30 @@ void smallAsteroidBroken() {
   count2++;
   if (count==totalAsteroids) {
     complete = true;
+    time = frameCount;
     goodEnd();
   }
 }
 
 void keyPressed() {
-  if (keyCode==76&&!keys[76]&&!laser&&bullets) {
+  System.out.println(keyCode);
+  if (tas?false:(keyCode==76&&!keys[76]&&!laser&&bullets)) {
     particles.add(new particle(s.getPos(),s.getD(),s.getVelocity()));
     shots++;
   }
-  if (keyCode==32&&!keys[32]) {
+  if (tas?false:(keyCode==32&&!keys[32])) {
     paused = !paused;
   }
-  if (keyCode<keys.length) keys[keyCode]=true;
-  if (key==',') s.dash();
-  if (key=='r') reset();
-  if (keyCode==10) s.warp();
-  if (key==';') {
+  if (tas?false:key==',') s.dash();
+  if (tas?false:(key=='r'&&!keys[82])) reset();
+  if (tas?false:(keyCode==10&&!keys[10])) s.warp();
+  if (tas?false:key==';'&&!keys[59]) {
     noLoop();
     loadState(state1);
     loop();
   }
-  if (key=='\'') state1=saveState();
+  if (tas?false:key=='\''&&!keys[222]) state1=saveState();
+  if (keyCode<keys.length) keys[keyCode]=true;
 }
 
 void keyReleased() {
@@ -268,7 +326,7 @@ void goodEnd() {
   noStroke();
   fill(0);
   textAlign(CENTER,CENTER);
-  text("You got all "+count+" asteroids,\n\nincluding "+count2+" asteroids of the smallest size.\n\nYou used "+shots+" bullets",mouseX,mouseY);
+  text("You got all "+count+" asteroids,\n\nincluding "+count2+" asteroids of the smallest size."+(bullets?"\n\nYou used "+shots+" bullets":"")+"\n\nTime: "+round(time/6)/10f+" seconds",mouseX,mouseY);
 }
 
 ArrayList <rock> copyRocks(ArrayList <rock> _rocks) {
@@ -339,10 +397,19 @@ void mousePressed() {
       }
     }
     if (mode==3) {
-      totalAsteroids = breakAsteroids?620:20;
+      totalAsteroids = breakAsteroids?rocks.size()*31:rocks.size();
       state1 = saveState();
     }
     if (mode<4) mode++;
     if (mode==3&&!bullets) mode++;
   }
+  if (mouseX>=width/2-200&&mouseX<=width/2+200&&mouseY>=height/2+75&&mouseY<=height/2+125) {
+    if (mode==0) {
+      mode=4;
+      tas=true;
+      totalAsteroids=rocks.size()*31;
+      //noLoop();
+    }
+  }
+  //redraw();
 }
