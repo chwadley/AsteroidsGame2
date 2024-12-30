@@ -63,7 +63,7 @@ class rock extends Floater {
   }
   
   public float[] getPos() {
-    return new float[]{(float)x,(float)y};
+    return new float[]{x,y};
   }
   
   public float getSize() {
